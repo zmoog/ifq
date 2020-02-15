@@ -1,5 +1,4 @@
 import logging
-import os
 import tempfile
 import requests
 
@@ -12,7 +11,7 @@ IFQ_ARCHIVE_URL = 'https://shop.ilfattoquotidiano.it/archivio-edizioni/'
 
 class Scraper:
     """Scrape the IFQ website to download PDF files.
-    
+
     This class require a valid paid subscription to the newspaper.
     """
 
@@ -54,12 +53,16 @@ class Scraper:
 
             #
             # Check if the login was successful
-            # 
+            #
             # Lookup if the `wordpress_logged_in` cookie has been set,
             # see https://wordpress.org/support/article/cookies/ 
             # for more details.
             #
-            if len([key for key in session.cookies.keys() if 'wordpress_logged_in' in key]) < 1:
+            logged_in_cookies = [
+                key for key in session.cookies.keys()
+                if 'wordpress_logged_in' in key
+                ]
+            if len(logged_in_cookies) < 1:
                 self.logger.error('login failed')
                 raise LoginFailed("Cannot login")
 
@@ -81,7 +84,7 @@ class Scraper:
                                 stream=True)
 
             if resp.status_code != 200:
-                self.logger.error(f'status code ${resp.status_code}, cannot download the issue')
+                self.logger.error(f'status code ${resp.status_code}')
                 raise IssueNotAvailable()
 
             self.logger.info(f'copying the PDF bytes into a temporary file')
@@ -102,6 +105,6 @@ class Scraper:
 class IssueNotAvailable(Exception):
     pass
 
+
 class LoginFailed(Exception):
     pass
-
