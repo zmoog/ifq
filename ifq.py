@@ -55,7 +55,7 @@ class Scraper:
             # Check if the login was successful
             #
             # Lookup if the `wordpress_logged_in` cookie has been set,
-            # see https://wordpress.org/support/article/cookies/ 
+            # see https://wordpress.org/support/article/cookies/
             # for more details.
             #
             logged_in_cookies = [
