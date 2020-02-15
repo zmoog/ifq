@@ -27,19 +27,17 @@ class Scraper:
         return path to the temp file on the local filesystem.
         """
 
-        # prepare the payloads
-        login_payload = dict(
-            username=self.username,
-            password=self.password,
-            _wp_http_referer='/login/',
-            redirect='/login/',
-            login='Accedi')
-
-        edition_payload = dict(
-            edition_date=pub_date.strftime('%d/%m/%Y'),
-            _wp_http_referer='/abbonati/')
-
         with requests.Session() as session:
+
+            #
+            # 1) First thing first, let's get the login page.
+            #
+            login_payload = dict(
+                username=self.username,
+                password=self.password,
+                _wp_http_referer='/login/',
+                redirect='/login/',
+                login='Accedi')
 
             resp = session.get(IFQ_LOGIN_URL)
             tree = html.fromstring(resp.text)
@@ -47,12 +45,12 @@ class Scraper:
             login_payload['woocommerce-login-nonce'] = nonce[0].value
 
             #
-            # do the actual login on the website
+            # 2) Now we can do the actual login on the website
             #
             resp = session.post(IFQ_LOGIN_URL, data=login_payload)
 
             #
-            # Check if the login was successful
+            # 3) Check if the login was successful
             #
             # Lookup if the `wordpress_logged_in` cookie has been set,
             # see https://wordpress.org/support/article/cookies/
@@ -61,24 +59,33 @@ class Scraper:
             logged_in_cookies = [
                 key for key in session.cookies.keys()
                 if 'wordpress_logged_in' in key
-                ]
-            if len(logged_in_cookies) < 1:
+            ]
+
+            if not logged_in_cookies:
                 self.logger.error('login failed')
                 raise LoginFailed("Cannot login")
 
+            #
+            # 4) Visit the issues archive page
+            #
             self.logger.info('getting archive page')
-            # open the archive page and get the nonce
             resp = session.get(IFQ_ARCHIVE_URL)
 
+            # we need the `nonce` from this page
             tree = html.fromstring(resp.text)
             nonce = tree.xpath('//input[@name="edition_date_nonce"]')
             edition_date_nonce = nonce[0].value
 
+            #
+            # 5) Download the PDF file from the archive
+            #
+            edition_payload = dict(
+                edition_date=pub_date.strftime('%d/%m/%Y'),
+                _wp_http_referer='/abbonati/')
             edition_payload['edition_date_nonce'] = edition_date_nonce
 
             self.logger.info(f'getting IFQ opening issue for ${pub_date}')
 
-            # download the actual issues
             resp = session.post(IFQ_ARCHIVE_URL,
                                 data=edition_payload,
                                 stream=True)
@@ -87,8 +94,10 @@ class Scraper:
                 self.logger.error(f'status code ${resp.status_code}')
                 raise IssueNotAvailable()
 
+            #
+            # 6) Final step, now copy the PDF bytes into a temporary file.
+            #
             self.logger.info(f'copying the PDF bytes into a temporary file')
-            # copy the PDF bytes into a temporary file
             file = tempfile.NamedTemporaryFile(delete=False)
 
             with file as f:
