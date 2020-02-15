@@ -1,0 +1,16 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+# [dev-packages]
+# pytest = "==5.1.2"
+# pypdf4 = "==1.27.0"
+
+[packages]
+# dropbox = "==9.4.0"
+lxml = "==4.4.1"
+requests = "==2.22.0"
+
+[requires]
+python_version = "3.7"
