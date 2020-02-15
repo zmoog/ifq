@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.7]
 
     steps:
     - uses: actions/checkout@v2
@@ -21,6 +21,9 @@ jobs:
         python -m pip install --upgrade pipenv
         # pip install -r requirements.txt
         pipenv install
+    - name: checks for security vulnerabilities and PEP 508 requirements
+      run: |
+        pipenv check
     - name: Lint with flake8
       run: |
         # pip install flake8
