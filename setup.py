@@ -5,7 +5,7 @@ with open("README.md") as f:
     long_description = f.read()
 
 NAME = "ifq"
-REQUIRES = ["lxml >= 4.5.0", "requests >= 2.22.0"]
+REQUIRES = ["lxml >= 4.5.0", "requests >= 2.23.0"]
 
 setup(
     name=NAME,
