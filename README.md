@@ -18,11 +18,15 @@ path_to_pdf_file = scraper.download_pdf(date.today())
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+
 
 ### Prerequisites
 
 > What things you need to install the software and how to install them
+
+ * Python 3.7
+ * pipenv
 
 You need to install `pipenv` to handle the dependencies.
 
@@ -34,19 +38,21 @@ $ pip install pipenv
 
 > A step by step series of examples that tell you how to get a development env running
 
-Install all the dependencies (prod and dev):
+Install all the library dependencies (prod and dev):
 
 ```
 $ pipenv install -dev
 ```
 
-And repeat
+> End with an example of getting some data out of the system or using it for a little demo
+
 
 ```
-until finished
+$ pipenv shell
+$ python
+>>> from ifq import Scraper
+>>>
 ```
-
-End with an example of getting some data out of the system or using it for a little demo
 
 ## Running the tests
 
@@ -54,18 +60,21 @@ Explain how to run the automated tests for this system
 
 ### Break down into end to end tests
 
+This library is just a thin layer orchestrating the dependent library, so we can run a test that downloads an actual PDF from the IFQ website.
+
+```
+$ export IFQ_USERNAME=""
+$ export IFQ_PASSWORD=""
+
+$ pipenv run pytet examples
+```
+
+### Coding style tests
+
 Explain what these tests test and why
 
 ```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
+$ pipenv run flake8 .
 ```
 
 ## Built With
