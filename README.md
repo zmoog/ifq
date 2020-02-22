@@ -1,6 +1,8 @@
 # IFQ
 
-Library to download www.ilfattoquotidiano.it issues in PDF.
+Library to download ilfattoquotidiano.it issues in PDF.
+
+## Usage
 
 ```python
 from datetime import date
@@ -20,20 +22,22 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+> What things you need to install the software and how to install them
+
+You need to install `pipenv` to handle the dependencies.
 
 ```
-Give examples
+$ pip install pipenv
 ```
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
+> A step by step series of examples that tell you how to get a development env running
 
-Say what the step will be
+Install all the dependencies (prod and dev):
 
 ```
-Give the example
+$ pipenv install -dev
 ```
 
 And repeat
@@ -64,10 +68,6 @@ Explain what these tests test and why
 Give an example
 ```
 
-## Deployment
-
-Add additional notes about how to deploy this on a live system
-
 ## Built With
 
 * [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
@@ -84,18 +84,14 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Maurizio Branca** - *Initial work* - [zmoog](https://github.com/zmoog)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+See also the list of [contributors](https://github.com/your/project/
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the Apache License Version 2.0 - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
-https://gist.github.com/PurpleBooth/109311bb0361f32d87a2
+A great "thank you!" to the all authors of lxml and requests to creating such a powerful and easy to use tools.
