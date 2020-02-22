@@ -9,7 +9,7 @@ REQUIRES = ["lxml >= 4.5.0", "requests >= 2.23.0"]
 
 setup(
     name=NAME,
-    version="0.1.0",
+    version="0.2.0",
     description="library to download www.ilfattoquotidiano.it issues in PDF",
     author_email="maurizio.branca@gmail.com",
     url="https://github.com/zmoog/ifq",
