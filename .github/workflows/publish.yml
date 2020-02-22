@@ -21,6 +21,7 @@ jobs:
 
       - name: Build package
         run: |
+          pip install --user pipenv
           pipenv install -dev
           pipenv run python setup.py bdist_wheel 
 
