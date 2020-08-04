@@ -5,7 +5,7 @@ verify_ssl = true
 
 [packages]
 # dropbox = "==9.4.0"
-lxml = "==4.5.0"
+lxml = "==4.5.2"
 requests = "==2.23.0"
 
 [requires]
