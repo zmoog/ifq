@@ -35,8 +35,10 @@ setup(
         "requests >= 2.28.1",
     ],
     extras_require={
-        "test": ["pytest"],
-        "lint": ["black"]
+        "test": [
+            "pytest",
+            "wheel >= 0.38.3",
+        ],
     },
     python_requires=">=3.7",
 )
