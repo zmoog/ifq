@@ -36,6 +36,9 @@ setup(
     ],
     extras_require={
         "test": [
+            "black",
+            "flake8",
+            "isort",
             "pytest",
             "safety",
             "wheel >= 0.38.3",

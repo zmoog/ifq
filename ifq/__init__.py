@@ -1,12 +1,12 @@
 import logging
 import tempfile
-import requests
-
 from datetime import date
+
+import requests
 from lxml import html
 
-IFQ_LOGIN_URL = 'https://shop.ilfattoquotidiano.it/login/'
-IFQ_ARCHIVE_URL = 'https://shop.ilfattoquotidiano.it/archivio-edizioni/'
+IFQ_LOGIN_URL = "https://shop.ilfattoquotidiano.it/login/"
+IFQ_ARCHIVE_URL = "https://shop.ilfattoquotidiano.it/archivio-edizioni/"
 
 
 class Scraper:
@@ -31,20 +31,22 @@ class Scraper:
         login_payload = dict(
             username=self.username,
             password=self.password,
-            _wp_http_referer='/login/',
-            redirect='/login/',
-            login='Accedi')
+            _wp_http_referer="/login/",
+            redirect="/login/",
+            login="Accedi",
+        )
 
         edition_payload = dict(
-            edition_date=pub_date.strftime('%d/%m/%Y'),
-            _wp_http_referer='/abbonati/')
+            edition_date=pub_date.strftime("%d/%m/%Y"),
+            _wp_http_referer="/abbonati/",
+        )
 
         with requests.Session() as session:
 
             resp = session.get(IFQ_LOGIN_URL)
             tree = html.fromstring(resp.text)
             nonce = tree.xpath('//input[@id="woocommerce-login-nonce"]')
-            login_payload['woocommerce-login-nonce'] = nonce[0].value
+            login_payload["woocommerce-login-nonce"] = nonce[0].value
 
             #
             # do the actual login on the website
@@ -59,14 +61,15 @@ class Scraper:
             # for more details.
             #
             logged_in_cookies = [
-                key for key in session.cookies.keys()
-                if 'wordpress_logged_in' in key
-                ]
+                key
+                for key in session.cookies.keys()
+                if "wordpress_logged_in" in key
+            ]
             if len(logged_in_cookies) < 1:
-                self.logger.error('login failed')
+                self.logger.error("login failed")
                 raise LoginFailed("Cannot login")
 
-            self.logger.info('getting archive page')
+            self.logger.info("getting archive page")
             # open the archive page and get the nonce
             resp = session.get(IFQ_ARCHIVE_URL)
 
@@ -74,20 +77,20 @@ class Scraper:
             nonce = tree.xpath('//input[@name="edition_date_nonce"]')
             edition_date_nonce = nonce[0].value
 
-            edition_payload['edition_date_nonce'] = edition_date_nonce
+            edition_payload["edition_date_nonce"] = edition_date_nonce
 
-            self.logger.info(f'getting IFQ opening issue for ${pub_date}')
+            self.logger.info(f"getting IFQ opening issue for ${pub_date}")
 
             # download the actual issues
-            resp = session.post(IFQ_ARCHIVE_URL,
-                                data=edition_payload,
-                                stream=True)
+            resp = session.post(
+                IFQ_ARCHIVE_URL, data=edition_payload, stream=True
+            )
 
             if resp.status_code != 200:
-                self.logger.error(f'status code ${resp.status_code}')
+                self.logger.error(f"status code ${resp.status_code}")
                 raise IssueNotAvailable()
 
-            self.logger.info(f'copying the PDF bytes into a temporary file')
+            self.logger.info("copying the PDF bytes into a temporary file")
             # copy the PDF bytes into a temporary file
             file = tempfile.NamedTemporaryFile(delete=False)
 
@@ -98,7 +101,7 @@ class Scraper:
                         f.write(chunk)
                         f.flush()
 
-            self.logger.info(f'PDF file available at ${file.name}')
+            self.logger.info(f"PDF file available at ${file.name}")
             return file.name
 
 
