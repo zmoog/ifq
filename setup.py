@@ -37,6 +37,7 @@ setup(
     extras_require={
         "test": [
             "pytest",
+            "safety",
             "wheel >= 0.38.3",
         ],
     },

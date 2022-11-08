@@ -19,9 +19,9 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -e '.[test]'
-    # - name: Checks for security vulnerabilities and PEP 508 requirements
-    #   run: |
-    #     pipenv check
+    - name: Checks for security vulnerabilities
+      run: |
+        safety check
     # - name: Lint with flake8
     #   run: |
     #     # stop the build if there are Python syntax errors or undefined names
