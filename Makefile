@@ -1,9 +1,9 @@
 .PHONY:
 
 sources = ifq tests
-line_length = 79
-black_options = --line-length=${line_length} ${sources}
-isort_options = --line-length=${line_length} --py 39 --profile black ${sources}
+line_length = 80
+black_options = --line-length=${line_length} ifq tests
+isort_options = **/*.py -l ${line_length}
 
 lint: lint-black lint-isort lint-flake8  ## Lint the project on the host
 

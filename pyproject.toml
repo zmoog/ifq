@@ -1,0 +1,32 @@
+[project]
+name = "ifq"
+version = "0.4"
+description = "CLI tool and Python library to download PDF issues of ilfattoquotidiano.it"
+readme = "README.md"
+authors = [{name = "Maurizio Branca"}]
+license = {text = "Apache-2.0"}
+requires-python = ">=3.8"
+classifiers = [
+    "License :: OSI Approved :: Apache Software License"
+]
+dependencies = [
+    "click",
+    "requests",
+    "lxml",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+Homepage = "https://github.com/zmoog/ifq"
+Changelog = "https://github.com/zmoog/ifq/releases"
+Issues = "https://github.com/zmoog/ifq/issues"
+CI = "https://github.com/zmoog/ifq/actions"
+
+[project.scripts]
+ifq = "ifq.cli:cli"
+
+[project.optional-dependencies]
+test = ["pytest", "black", "flake8", "isort"]

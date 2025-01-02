@@ -1,101 +1,68 @@
-# IFQ
+# ifq
 
-Library to download www.ilfattoquotidiano.it issues in PDF.
+[![PyPI](https://img.shields.io/pypi/v/ifq.svg)](https://pypi.org/project/ifq/)
+[![Changelog](https://img.shields.io/github/v/release/zmoog/ifq?include_prereleases&label=changelog)](https://github.com/zmoog/ifq/releases)
+[![Tests](https://github.com/zmoog/ifq/actions/workflows/test.yml/badge.svg)](https://github.com/zmoog/ifq/actions/workflows/test.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/zmoog/ifq/blob/master/LICENSE)
 
-```python
-from datetime import date
-from ifq import Scraper
+CLI tool and Python library to download PDF issues of ilfattoquotidiano.it
 
-username = ''  # your ifq username
-password = ''  # your ifq password
+## Installation
 
-scraper = Scraper(username, password)
+Install this tool using `pip`:
 
-path_to_pdf_file = scraper.download_pdf(date.today())
+```bash
+pip install ifq
 ```
 
-## Getting Started
+## Usage
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+Download the IFQ issue for Jan, 2nd 2025:
 
-### Prerequisites
+```sh
+# Requires a valid subscription to the newspaper
+export IFQ_USERNAME="[your username]"
+export IFQ_PASSWORD="[your password]"
 
-What things you need to install the software and how to install them
+$ ifq issues download 2025-01-02
 
-```
-Give examples
-```
+Downloading issue for 2025-01-02 00:00:00 to /Users/zmoog/code/projects/zmoog/ifq
+Downloaded issue to /Users/zmoog/code/projects/zmoog/ifq/2025-01-02.pdf
 
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
+$ file 2025-01-02.pdf 
+2025-01-02.pdf: PDF document, version 1.7
 ```
 
-And repeat
+For help, run:
 
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
+```bash
+ifq --help
 ```
 
-### And coding style tests
+You can also use:
 
-Explain what these tests test and why
-
-```
-Give an example
+```bash
+python -m ifq --help
 ```
 
-## Deployment
+## Development
 
-Add additional notes about how to deploy this on a live system
+To contribute to this tool, first checkout the code. Then create a new virtual environment:
 
-## Built With
+```bash
+cd ifq
+python -m venv venv
+source venv/bin/activate
+```
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+Now install the dependencies and test dependencies:
 
-## Contributing
+```bash
+pip install -e '.[test]'
+```
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+To run the tests:
 
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
-
-## Authors
-
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
-
-https://gist.github.com/PurpleBooth/109311bb0361f32d87a2
+```bash
+python -m pytest
+```
