@@ -1,12 +1,15 @@
 import logging
+import os
 import tempfile
 from datetime import date
+from pathlib import Path
 
 import requests
 from lxml import html
 
 IFQ_LOGIN_URL = "https://shop.ilfattoquotidiano.it/login/"
 IFQ_ARCHIVE_URL = "https://shop.ilfattoquotidiano.it/archivio-edizioni/"
+IFQ_MIN_CONTENT_LENGTH = 9000000
 
 
 class Scraper:
@@ -20,7 +23,9 @@ class Scraper:
         self.username = username
         self.password = password
 
-    def download_pdf(self, pub_date: date) -> str:
+    def download_pdf(
+        self, pub_date: date, output_dir: Path = Path.cwd()
+    ) -> Path:
         """Download a IFQ issues from the website archive.
 
         Scrape and download the issue published at the give pub_date and
@@ -67,7 +72,7 @@ class Scraper:
             ]
             if len(logged_in_cookies) < 1:
                 self.logger.error("login failed")
-                raise LoginFailed("Cannot login")
+                raise LoginError("Cannot login")
 
             self.logger.info("getting archive page")
             # open the archive page and get the nonce
@@ -86,12 +91,28 @@ class Scraper:
                 IFQ_ARCHIVE_URL, data=edition_payload, stream=True
             )
 
-            if resp.status_code != 200:
-                self.logger.error(f"status code ${resp.status_code}")
-                raise IssueNotAvailable()
+            self.logger.debug(f"status code: {resp.status_code}")
+            self.logger.debug(f"headers: {resp.headers}")
+            self.logger.debug(f"content length: {len(resp.content)}")
 
-            self.logger.info("copying the PDF bytes into a temporary file")
-            # copy the PDF bytes into a temporary file
+            if resp.status_code != 200:
+                raise IssueNotAvailableError(
+                    f"expected status code 200, got ${resp.status_code}"
+                )
+
+            if resp.headers["Content-Type"] != "application/pdf":
+                raise DownloadError(
+                    f"expected 'application/pdf', got '{resp.headers['Content-Type']}'"
+                )
+
+            if len(resp.content) < IFQ_MIN_CONTENT_LENGTH:
+                raise DownloadError(
+                    f"expected at least {IFQ_MIN_CONTENT_LENGTH} bytes, got {len(resp.content)}"
+                )
+
+            self.logger.debug("copying the PDF bytes into a temporary file")
+
+            # create a temporary file to store the PDF bytes
             file = tempfile.NamedTemporaryFile(delete=False)
 
             with file as f:
@@ -101,13 +122,24 @@ class Scraper:
                         f.write(chunk)
                         f.flush()
 
-            self.logger.info(f"PDF file available at ${file.name}")
-            return file.name
+            # rename the file to the output directory if specified
+            output_file = os.path.join(
+                output_dir, pub_date.strftime("%Y-%m-%d") + ".pdf"
+            )
+            os.rename(file.name, output_file)
+
+            self.logger.info(f"PDF file available at ${output_file}")
+
+            return output_file
 
 
-class IssueNotAvailable(Exception):
+class IssueNotAvailableError(Exception):
     pass
 
 
-class LoginFailed(Exception):
+class LoginError(Exception):
+    pass
+
+
+class DownloadError(Exception):
     pass
