@@ -9,7 +9,7 @@ from lxml import html
 
 IFQ_LOGIN_URL = "https://shop.ilfattoquotidiano.it/login/"
 IFQ_ARCHIVE_URL = "https://shop.ilfattoquotidiano.it/archivio-edizioni/"
-IFQ_MIN_CONTENT_LENGTH = 9000000
+IFQ_MIN_CONTENT_LENGTH = 8_000_000
 
 
 class Scraper:
