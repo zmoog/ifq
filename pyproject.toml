@@ -1,6 +1,6 @@
 [project]
 name = "ifq"
-version = "0.4"
+version = "0.4.1"
 description = "CLI tool and Python library to download PDF issues of ilfattoquotidiano.it"
 readme = "README.md"
 authors = [{name = "Maurizio Branca"}]
