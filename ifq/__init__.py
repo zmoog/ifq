@@ -3,12 +3,15 @@ import os
 import tempfile
 from datetime import date
 from pathlib import Path
+from urllib.parse import urljoin
 
 import requests
 from lxml import html
 
 IFQ_LOGIN_URL = "https://shop.ilfattoquotidiano.it/login/"
-IFQ_ARCHIVE_URL = "https://shop.ilfattoquotidiano.it/archivio-edizioni/"
+IFQ_EDITION_LOOKUP_URL = (
+    "https://www.ilfattoquotidiano.it/ilfattoquotidiano/getByDate/edizione/"
+)
 IFQ_MIN_CONTENT_LENGTH = 8_000_000
 
 
@@ -41,22 +44,21 @@ class Scraper:
             login="Accedi",
         )
 
-        edition_payload = dict(
-            edition_date=pub_date.strftime("%d/%m/%Y"),
-            _wp_http_referer="/abbonati/",
-        )
-
         with requests.Session() as session:
 
             resp = session.get(IFQ_LOGIN_URL)
+            resp.raise_for_status()
             tree = html.fromstring(resp.text)
-            nonce = tree.xpath('//input[@id="woocommerce-login-nonce"]')
-            login_payload["woocommerce-login-nonce"] = nonce[0].value
+            nonce = tree.xpath('//input[@id="woocommerce-login-nonce"]/@value')
+            if not nonce:
+                raise LoginError("Cannot find login form on IFQ login page")
+            login_payload["woocommerce-login-nonce"] = nonce[0]
 
             #
             # do the actual login on the website
             #
             resp = session.post(IFQ_LOGIN_URL, data=login_payload)
+            resp.raise_for_status()
 
             #
             # Check if the login was successful
@@ -74,25 +76,34 @@ class Scraper:
                 self.logger.error("login failed")
                 raise LoginError("Cannot login")
 
-            self.logger.info("getting archive page")
-            # open the archive page and get the nonce
-            resp = session.get(IFQ_ARCHIVE_URL)
+            self.logger.info(f"looking up IFQ issue for {pub_date}")
+            resp = session.get(
+                IFQ_EDITION_LOOKUP_URL + pub_date.strftime("%Y-%m-%d")
+            )
+            resp.raise_for_status()
+            edition_url = resp.json().get("url")
+            if not edition_url:
+                raise IssueNotAvailableError(
+                    f"No issue available for {pub_date:%Y-%m-%d}"
+                )
 
+            resp = session.get(edition_url)
+            resp.raise_for_status()
             tree = html.fromstring(resp.text)
-            nonce = tree.xpath('//input[@name="edition_date_nonce"]')
-            edition_date_nonce = nonce[0].value
+            download_links = tree.xpath(
+                '//*[@data-edition-action="download"]/@data-href'
+            )
+            if not download_links:
+                raise DownloadError(
+                    f"PDF download link not available for {pub_date:%Y-%m-%d}; "
+                    "check your subscription"
+                )
 
-            edition_payload["edition_date_nonce"] = edition_date_nonce
-
-            self.logger.info(f"getting IFQ opening issue for ${pub_date}")
-
-            # download the actual issues
-            resp = session.post(
-                IFQ_ARCHIVE_URL, data=edition_payload, stream=True
+            resp = session.get(
+                urljoin(edition_url, download_links[0]), stream=True
             )
 
             self.logger.debug(f"status code: {resp.status_code}")
-            self.logger.debug(f"headers: {resp.headers}")
             self.logger.debug(f"content length: {len(resp.content)}")
 
             if resp.status_code != 200:
@@ -100,14 +111,16 @@ class Scraper:
                     f"expected status code 200, got ${resp.status_code}"
                 )
 
-            if resp.headers["Content-Type"] != "application/pdf":
+            content_type = resp.headers.get("Content-Type", "")
+            if content_type.split(";", 1)[0].strip() != "application/pdf":
                 raise DownloadError(
-                    f"expected 'application/pdf', got '{resp.headers['Content-Type']}'"
+                    f"expected 'application/pdf', got '{content_type}'"
                 )
 
             if len(resp.content) < IFQ_MIN_CONTENT_LENGTH:
                 raise DownloadError(
-                    f"expected at least {IFQ_MIN_CONTENT_LENGTH} bytes, got {len(resp.content)}"
+                    f"expected at least {IFQ_MIN_CONTENT_LENGTH} bytes, "
+                    f"got {len(resp.content)}"
                 )
 
             self.logger.debug("copying the PDF bytes into a temporary file")
